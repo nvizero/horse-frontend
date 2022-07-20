@@ -2,6 +2,13 @@
   padding: 0 2rem;
 }
 
+.logincontainer {
+  border-style:solid;
+  margin: 5% 10% 0% 10% ;
+  padding: 50px;
+  border-radius: 15px;
+}
+
 .main {
   min-height: 100vh;
   padding: 4rem 0;
