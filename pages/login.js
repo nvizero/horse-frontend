@@ -1,7 +1,37 @@
-import styles from "../styles/Home.module.css";
-import "bootstrap/dist/css/bootstrap.css";
+import React, { useState, useEffect } from "react";
+import { connect, useDispatch, useStore, useSelector } from "react-redux";
+import { useForm } from "react-hook-form";
 
-export default function Home() {
+import { login } from "../store/slices/auth";
+import { useRouter } from "next/router";
+import { wrapper } from "../store";
+function Login(props) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.table(data);
+    (async () => {
+      let { email, password } = data;
+      let res = await dispatch(
+        login({
+          grant_type: "password",
+          email,
+          password,
+        })
+      );
+
+      if (res.payload.isLogin) {
+        router.push("/");
+      }
+    })();
+  };
+
   return (
     <>
       <div className="container-fluid ps-md-0">
@@ -14,15 +44,18 @@ export default function Home() {
                   <div className="col-md-9 col-lg-8 mx-auto">
                     <h3 className="login-heading mb-4">Welcome back!</h3>
 
-                    <form>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                       <div className="form-floating mb-3">
                         <input
-                          type="email"
+                          type="text"
                           className="form-control"
                           id="floatingInput"
-                          placeholder="name@example.com"
+                          placeholder="Account"
+                          {...register("email", {
+                            required: "this is a required",
+                          })}
                         />
-                        <label htmlFor="floatingInput">Email address</label>
+                        <label htmlFor="floatingInput">Account </label>
                       </div>
                       <div className="form-floating mb-3">
                         <input
@@ -30,6 +63,9 @@ export default function Home() {
                           className="form-control"
                           id="floatingPassword"
                           placeholder="Password"
+                          {...register("password", {
+                            required: "this is a required",
+                          })}
                         />
                         <label htmlFor="floatingPassword">Password</label>
                       </div>
@@ -53,3 +89,23 @@ export default function Home() {
     </>
   );
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    ({ ctx }) => {
+      const { isLogin, me } = store.getState().auth;
+      if (isLogin) {
+        return {
+          redirect: {
+            destination: "/",
+            permanent: false,
+          },
+        };
+      }
+      return {
+        props: {},
+      };
+    }
+);
+
+export default Login;
